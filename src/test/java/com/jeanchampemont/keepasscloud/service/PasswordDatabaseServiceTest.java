@@ -10,6 +10,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -54,5 +57,17 @@ public class PasswordDatabaseServiceTest {
         var result = service.exists("slug");
 
         assertThat(result).isFalse();
+    }
+
+    @Test
+    public void testGetAll() {
+        List<PasswordDatabase> dbs = new ArrayList<>();
+        dbs.add(new PasswordDatabase("test_1", Instant.now()));
+        dbs.add(new PasswordDatabase("test_2", Instant.now()));
+        when(repository.findAll()).thenReturn(dbs);
+
+        var result = service.getAll();
+
+        assertThat(result.map(PasswordDatabase::getName).collect(Collectors.toList())).contains("test_1", "test_2");
     }
 }

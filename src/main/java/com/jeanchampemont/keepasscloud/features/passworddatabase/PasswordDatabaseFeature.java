@@ -8,11 +8,10 @@ import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Path("/password-database")
@@ -33,6 +32,12 @@ public class PasswordDatabaseFeature {
             throw new NameAlreadyUsed(request.getName());
         }
         return map(service.create(request.getName()));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<PasswordDatabase> getAll() {
+        return service.getAll().map(this::map).collect(Collectors.toList());
     }
 
     private PasswordDatabase map(com.jeanchampemont.keepasscloud.db.model.PasswordDatabase passwordDatabase) {
