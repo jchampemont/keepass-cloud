@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.time.Clock;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -33,5 +35,13 @@ public class PasswordDatabaseService {
 
     public Stream<PasswordDatabase> getAll() {
         return StreamSupport.stream(repository.findAll().spliterator(), false);
+    }
+
+    public Optional<PasswordDatabase> get(UUID id) {
+        return repository.findById(id);
+    }
+
+    public void delete(UUID id) {
+        repository.deleteById(id);
     }
 }

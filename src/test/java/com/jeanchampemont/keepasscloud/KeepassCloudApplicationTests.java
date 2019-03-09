@@ -82,4 +82,77 @@ public class KeepassCloudApplicationTests {
         assertThat(response.getBody().stream().map(PasswordDatabase::getName)).contains("listing");
     }
 
+    @Test
+    public void canGetAPasswordDatabase() {
+        var request = new CreatePasswordDatabaseRequest();
+        request.setName("toGet");
+        var id = restTemplate.postForEntity("/password-database", request, PasswordDatabase.class).getBody().getId();
+
+        var response = restTemplate.getForEntity("/password-database/" + id, PasswordDatabase.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getId()).isEqualTo(id);
+        assertThat(response.getBody().getName()).isEqualTo("toGet");
+        assertThat(response.getBody().getCreated()).isEqualTo(Instant.ofEpochSecond(609948000));
+        assertThat(response.getBody().getModified()).isNull();
+    }
+
+    @Test
+    public void cannotGetUnexistingPasswordDatabase() {
+        var response = restTemplate.getForEntity("/password-database/de5a6ab8-1c43-4ac8-8682-e7509bc8c23b", Error.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getCode()).isEqualTo(2);
+        assertThat(response.getBody().getMessage()).contains("was not found");
+    }
+
+    @Test
+    public void cannotGetPasswordDatabaseWithInvalidUUID() {
+        var response = restTemplate.getForEntity("/password-database/invalid-uuid", Error.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getCode()).isEqualTo(2);
+        assertThat(response.getBody().getMessage()).contains("was not found");
+    }
+
+    @Test
+    public void canDeleteAPasswordDatabase() {
+        var request = new CreatePasswordDatabaseRequest();
+        request.setName("toDelete");
+        var id = restTemplate.postForEntity("/password-database", request, PasswordDatabase.class).getBody().getId();
+
+        var response = restTemplate.exchange("/password-database/" + id, HttpMethod.DELETE, null, Void.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+
+        var response2 = restTemplate.getForEntity("/password-database/" + id, Error.class);
+
+        assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response2.getBody()).isNotNull();
+        assertThat(response2.getBody().getCode()).isEqualTo(2);
+        assertThat(response2.getBody().getMessage()).contains("was not found");
+    }
+
+    @Test
+    public void cannotDeleteUnexistingPasswordDatabase() {
+        var response = restTemplate.exchange("/password-database/de5a6ab8-1c43-4ac8-8682-e7509bc8c23b", HttpMethod.DELETE, null, Error.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getCode()).isEqualTo(2);
+        assertThat(response.getBody().getMessage()).contains("was not found");
+    }
+
+    @Test
+    public void cannotDeletePasswordDatabaseWithInvalidUUID() {
+        var response = restTemplate.exchange("/password-database/invalid-uuid", HttpMethod.DELETE, null, Error.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getCode()).isEqualTo(2);
+        assertThat(response.getBody().getMessage()).contains("was not found");
+    }
 }

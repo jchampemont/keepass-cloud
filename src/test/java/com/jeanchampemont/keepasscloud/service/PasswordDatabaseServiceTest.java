@@ -12,10 +12,13 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -69,5 +72,35 @@ public class PasswordDatabaseServiceTest {
         var result = service.getAll();
 
         assertThat(result.map(PasswordDatabase::getName).collect(Collectors.toList())).contains("test_1", "test_2");
+    }
+
+    @Test
+    public void testGetOneExisting() {
+        var id = UUID.randomUUID();
+        var db = new PasswordDatabase("test@", Instant.now());
+        when(repository.findById(id)).thenReturn(Optional.of(db));
+
+        var result = service.get(id);
+
+        assertThat(result).isNotEmpty();
+        assertThat(result.get()).isEqualTo(db);
+    }
+
+    @Test
+    public void testGetOneNotExisting() {
+        var id = UUID.randomUUID();
+        when(repository.findById(id)).thenReturn(Optional.empty());
+
+        var result = service.get(id);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void testDelete() {
+        var id = UUID.randomUUID();
+        service.delete(id);
+
+        verify(repository).deleteById(id);
     }
 }
