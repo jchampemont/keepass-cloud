@@ -44,7 +44,7 @@ public class KeepassCloudApplicationTests {
         var request = new CreatePasswordDatabaseRequest();
         request.setName("test");
 
-        var response = restTemplate.postForEntity("/password-database", request, PasswordDatabase.class);
+        var response = restTemplate.postForEntity("/api/password-database", request, PasswordDatabase.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -59,9 +59,9 @@ public class KeepassCloudApplicationTests {
         var request = new CreatePasswordDatabaseRequest();
         request.setName("existing");
 
-        restTemplate.postForEntity("/password-database", request, PasswordDatabase.class);
+        restTemplate.postForEntity("/api/password-database", request, PasswordDatabase.class);
         request.setName("exIsTinG");
-        var response = restTemplate.postForEntity("/password-database", request, Error.class);
+        var response = restTemplate.postForEntity("/api/password-database", request, Error.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
@@ -73,9 +73,9 @@ public class KeepassCloudApplicationTests {
     public void canListAllPasswordDatabase() {
         var request = new CreatePasswordDatabaseRequest();
         request.setName("listing");
-        restTemplate.postForEntity("/password-database", request, PasswordDatabase.class);
+        restTemplate.postForEntity("/api/password-database", request, PasswordDatabase.class);
 
-        var response = restTemplate.exchange("/password-database", HttpMethod.GET, null, new ParameterizedTypeReference<List<PasswordDatabase>>() {});
+        var response = restTemplate.exchange("/api/password-database", HttpMethod.GET, null, new ParameterizedTypeReference<List<PasswordDatabase>>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -86,9 +86,9 @@ public class KeepassCloudApplicationTests {
     public void canGetAPasswordDatabase() {
         var request = new CreatePasswordDatabaseRequest();
         request.setName("toGet");
-        var id = restTemplate.postForEntity("/password-database", request, PasswordDatabase.class).getBody().getId();
+        var id = restTemplate.postForEntity("/api/password-database", request, PasswordDatabase.class).getBody().getId();
 
-        var response = restTemplate.getForEntity("/password-database/" + id, PasswordDatabase.class);
+        var response = restTemplate.getForEntity("/api/password-database/" + id, PasswordDatabase.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -100,7 +100,7 @@ public class KeepassCloudApplicationTests {
 
     @Test
     public void cannotGetUnexistingPasswordDatabase() {
-        var response = restTemplate.getForEntity("/password-database/de5a6ab8-1c43-4ac8-8682-e7509bc8c23b", Error.class);
+        var response = restTemplate.getForEntity("/api/password-database/de5a6ab8-1c43-4ac8-8682-e7509bc8c23b", Error.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
@@ -110,7 +110,7 @@ public class KeepassCloudApplicationTests {
 
     @Test
     public void cannotGetPasswordDatabaseWithInvalidUUID() {
-        var response = restTemplate.getForEntity("/password-database/invalid-uuid", Error.class);
+        var response = restTemplate.getForEntity("/api/password-database/invalid-uuid", Error.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
@@ -122,13 +122,13 @@ public class KeepassCloudApplicationTests {
     public void canDeleteAPasswordDatabase() {
         var request = new CreatePasswordDatabaseRequest();
         request.setName("toDelete");
-        var id = restTemplate.postForEntity("/password-database", request, PasswordDatabase.class).getBody().getId();
+        var id = restTemplate.postForEntity("/api/password-database", request, PasswordDatabase.class).getBody().getId();
 
-        var response = restTemplate.exchange("/password-database/" + id, HttpMethod.DELETE, null, Void.class);
+        var response = restTemplate.exchange("/api/password-database/" + id, HttpMethod.DELETE, null, Void.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-        var response2 = restTemplate.getForEntity("/password-database/" + id, Error.class);
+        var response2 = restTemplate.getForEntity("/api/password-database/" + id, Error.class);
 
         assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response2.getBody()).isNotNull();
@@ -138,7 +138,7 @@ public class KeepassCloudApplicationTests {
 
     @Test
     public void cannotDeleteUnexistingPasswordDatabase() {
-        var response = restTemplate.exchange("/password-database/de5a6ab8-1c43-4ac8-8682-e7509bc8c23b", HttpMethod.DELETE, null, Error.class);
+        var response = restTemplate.exchange("/api/password-database/de5a6ab8-1c43-4ac8-8682-e7509bc8c23b", HttpMethod.DELETE, null, Error.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
@@ -148,7 +148,7 @@ public class KeepassCloudApplicationTests {
 
     @Test
     public void cannotDeletePasswordDatabaseWithInvalidUUID() {
-        var response = restTemplate.exchange("/password-database/invalid-uuid", HttpMethod.DELETE, null, Error.class);
+        var response = restTemplate.exchange("/api/password-database/invalid-uuid", HttpMethod.DELETE, null, Error.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
