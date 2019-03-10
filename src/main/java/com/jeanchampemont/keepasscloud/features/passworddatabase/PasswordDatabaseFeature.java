@@ -1,6 +1,6 @@
 package com.jeanchampemont.keepasscloud.features.passworddatabase;
 
-import com.jeanchampemont.keepasscloud.api.CreatePasswordDatabaseRequest;
+import com.jeanchampemont.keepasscloud.api.PasswordDatabaseRequest;
 import com.jeanchampemont.keepasscloud.api.PasswordDatabase;
 import com.jeanchampemont.keepasscloud.features.passworddatabase.error.NameAlreadyUsed;
 import com.jeanchampemont.keepasscloud.features.passworddatabase.error.PasswordDatabaseNotFound;
@@ -29,7 +29,7 @@ public class PasswordDatabaseFeature {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public PasswordDatabase create(@Valid CreatePasswordDatabaseRequest request) throws NameAlreadyUsed {
+    public PasswordDatabase create(@Valid PasswordDatabaseRequest request) throws NameAlreadyUsed {
         if (service.exists(request.getName())) {
             throw new NameAlreadyUsed(request.getName());
         }
@@ -48,6 +48,16 @@ public class PasswordDatabaseFeature {
     public PasswordDatabase getOne(@PathParam("id") String id) throws PasswordDatabaseNotFound {
         UUID uuid = readUUIDOrThrow(id);
         return service.get(uuid).map(this::map).orElseThrow(() -> new PasswordDatabaseNotFound(id));
+    }
+
+    @PUT
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public PasswordDatabase update(@Valid PasswordDatabaseRequest request, @PathParam("id") String id) throws NameAlreadyUsed, PasswordDatabaseNotFound {
+        UUID uuid = readUUIDOrThrow(id);
+        service.get(uuid).orElseThrow(() -> new PasswordDatabaseNotFound(id));
+        return map(service.update(uuid, request.getName()));
     }
 
     @DELETE

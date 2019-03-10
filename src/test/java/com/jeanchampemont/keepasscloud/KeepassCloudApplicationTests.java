@@ -1,6 +1,6 @@
 package com.jeanchampemont.keepasscloud;
 
-import com.jeanchampemont.keepasscloud.api.CreatePasswordDatabaseRequest;
+import com.jeanchampemont.keepasscloud.api.PasswordDatabaseRequest;
 import com.jeanchampemont.keepasscloud.api.PasswordDatabase;
 import com.jeanchampemont.keepasscloud.util.Error;
 import org.junit.Before;
@@ -13,7 +13,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.inject.Inject;
@@ -41,7 +40,7 @@ public class KeepassCloudApplicationTests {
 
     @Test
     public void canCreateAPasswordDatabase() {
-        var request = new CreatePasswordDatabaseRequest();
+        var request = new PasswordDatabaseRequest();
         request.setName("test");
 
         var response = restTemplate.postForEntity("/api/password-database", request, PasswordDatabase.class);
@@ -56,7 +55,7 @@ public class KeepassCloudApplicationTests {
 
     @Test
     public void cannotCreateAPasswordDatabaseWithSameNameTwice() {
-        var request = new CreatePasswordDatabaseRequest();
+        var request = new PasswordDatabaseRequest();
         request.setName("existing");
 
         restTemplate.postForEntity("/api/password-database", request, PasswordDatabase.class);
@@ -71,7 +70,7 @@ public class KeepassCloudApplicationTests {
 
     @Test
     public void canListAllPasswordDatabase() {
-        var request = new CreatePasswordDatabaseRequest();
+        var request = new PasswordDatabaseRequest();
         request.setName("listing");
         restTemplate.postForEntity("/api/password-database", request, PasswordDatabase.class);
 
@@ -84,7 +83,7 @@ public class KeepassCloudApplicationTests {
 
     @Test
     public void canGetAPasswordDatabase() {
-        var request = new CreatePasswordDatabaseRequest();
+        var request = new PasswordDatabaseRequest();
         request.setName("toGet");
         var id = restTemplate.postForEntity("/api/password-database", request, PasswordDatabase.class).getBody().getId();
 
@@ -120,7 +119,7 @@ public class KeepassCloudApplicationTests {
 
     @Test
     public void canDeleteAPasswordDatabase() {
-        var request = new CreatePasswordDatabaseRequest();
+        var request = new PasswordDatabaseRequest();
         request.setName("toDelete");
         var id = restTemplate.postForEntity("/api/password-database", request, PasswordDatabase.class).getBody().getId();
 

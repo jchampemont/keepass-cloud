@@ -2,6 +2,8 @@ package com.jeanchampemont.keepasscloud.service;
 
 import com.jeanchampemont.keepasscloud.db.model.PasswordDatabase;
 import com.jeanchampemont.keepasscloud.db.repository.PasswordDatabaseRepository;
+import com.jeanchampemont.keepasscloud.features.passworddatabase.error.NameAlreadyUsed;
+import com.jeanchampemont.keepasscloud.features.passworddatabase.error.PasswordDatabaseNotFound;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -27,6 +29,19 @@ public class PasswordDatabaseService {
     public PasswordDatabase create(String name) {
         PasswordDatabase passwordDatabase = new PasswordDatabase(name, clock.instant());
         return repository.save(passwordDatabase);
+    }
+
+    public PasswordDatabase update(UUID id, String name) throws PasswordDatabaseNotFound, NameAlreadyUsed {
+        PasswordDatabase sameName = repository.findByNameIgnoreCase(name);
+
+        if(sameName != null && !sameName.getId().equals(id)) {
+            throw new NameAlreadyUsed(name);
+        }
+
+        var existing = repository.findById(id).orElseThrow(() -> new PasswordDatabaseNotFound(id.toString()));
+        existing.setName(name);
+        existing.setModified(clock.instant());
+        return repository.save(existing);
     }
 
     public boolean exists(String name) {

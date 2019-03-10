@@ -15,6 +15,14 @@ Vue.component('crud-table', {
                 .then(response => {
                     this.rows = this.rows.filter(v => (v.id !== id));
                 });
+        },
+        edit: function(id) {
+            this.$refs.modal.edit(id);
+        },
+        refresh: function() {
+            axios
+                .get('/api/' + this.endpoint)
+                .then(response => (this.rows = response.data))
         }
     },
     template: `
@@ -36,21 +44,25 @@ Vue.component('crud-table', {
                         <span class="tag is-success" v-if="props.row.modified">
                             {{ new Date(props.row.modified).toLocaleDateString() }} à {{ new Date(props.row.modified).toLocaleTimeString() }}
                         </span>
+                        <span v-if="!props.row.modified">
+                            Jamais modifié.
+                        </span>
                     </b-table-column>
                     <b-table-column label="Actions">
-                        <button class="button is-primary is-small" type="button" @click="remove(props.row.id)">
+                        <button class="button is-small" type="button" @click="remove(props.row.id)">
                             <b-icon icon="delete" size="is-small"></b-icon>
+                        </button>
+                        <button class="button is-small" type="button" @click="edit(props.row.id)">
+                            <b-icon icon="pencil" size="is-small"></b-icon>
                         </button>
                     </b-table-column>
                 </template>
             </b-table>
             <hr />
-            <crud-modal :endpoint="endpoint"></crud-modal>
+            <crud-modal :endpoint="endpoint" ref="modal"></crud-modal>
         </div>
     `,
     mounted () {
-        axios
-            .get('/api/' + this.endpoint)
-            .then(response => (this.rows = response.data))
+        this.refresh();
     }
 });
